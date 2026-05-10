@@ -234,16 +234,51 @@ client.on("messageCreate", async (message) => {
       .setTitle("📋 Commands")
       .setColor(0x5865f2)
       .addFields(
-        { name: "`$ping`", value: "Check the bot's latency.", inline: false },
-        { name: "`$vouch`", value: "Get the vouch instructions.", inline: false },
-        { name: "`$inrole <role>`", value: "List all members in a role. Supports pagination.", inline: false },
-        { name: "`$rn <name>`", value: "Rename the current ticket channel.", inline: false },
-        { name: "`$clearinvites`", value: "Delete all server invites. Requires Manage Server.", inline: false },
-        { name: "`$vanitysetup`", value: "Set up automatic role rewards for members with specific text in their status.", inline: false },
-        { name: "`$vanitylist`", value: "View all vanity role configs for this server.", inline: false },
-        { name: "`$vanityremove <number>`", value: "Remove a vanity role config by its number.", inline: false },
+        {
+          name: "👤 Regular",
+          value: [
+            "`$ping` — Check the bot's latency.",
+            "`$vouch` — Get the vouch instructions.",
+            "`$inrole <role>` — List all members in a role (paginated).",
+            "`$rn <name>` — Rename the current ticket channel.",
+            "`$ticketcount` — Show how many tickets are currently open.",
+          ].join("\n"),
+          inline: false,
+        },
+        {
+          name: "🔨 Mod",
+          value: [
+            "`$clearinvites` — Delete all server invites.",
+          ].join("\n"),
+          inline: false,
+        },
+        {
+          name: "⚙️ Admin",
+          value: [
+            "`$vanitysetup` — Set up automatic role rewards for members with specific status text.",
+            "`$vanitylist` — View all vanity role configs.",
+            "`$vanityremove <number>` — Remove a vanity role config by its number.",
+          ].join("\n"),
+          inline: false,
+        },
       )
       .setFooter({ text: `Prefix: ${PREFIX}` });
+
+    message.channel.send({ embeds: [embed] });
+  }
+
+  // ── $ticketcount ───────────────────────────────────────────────────────────
+  if (command === "ticketcount") {
+    const ticketChannels = message.guild.channels.cache.filter(
+      c => c.permissionOverwrites?.cache.has(TICKET_BOT_ID)
+    );
+    const count = ticketChannels.size;
+
+    const embed = new EmbedBuilder()
+      .setTitle("🎫 Open Tickets")
+      .setDescription(`There are currently **${count}** open ticket${count !== 1 ? "s" : ""}.`)
+      .setColor(0x5865f2)
+      .setTimestamp();
 
     message.channel.send({ embeds: [embed] });
   }
