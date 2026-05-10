@@ -228,6 +228,26 @@ client.on("messageCreate", async (message) => {
     }
   }
 
+  // ── $help ──────────────────────────────────────────────────────────────────
+  if (command === "help") {
+    const embed = new EmbedBuilder()
+      .setTitle("📋 Commands")
+      .setColor(0x5865f2)
+      .addFields(
+        { name: "`$ping`", value: "Check the bot's latency.", inline: false },
+        { name: "`$vouch`", value: "Get the vouch instructions.", inline: false },
+        { name: "`$inrole <role>`", value: "List all members in a role. Supports pagination.", inline: false },
+        { name: "`$rn <name>`", value: "Rename the current ticket channel.", inline: false },
+        { name: "`$clearinvites`", value: "Delete all server invites. Requires Manage Server.", inline: false },
+        { name: "`$vanitysetup`", value: "Set up automatic role rewards for members with specific text in their status.", inline: false },
+        { name: "`$vanitylist`", value: "View all vanity role configs for this server.", inline: false },
+        { name: "`$vanityremove <number>`", value: "Remove a vanity role config by its number.", inline: false },
+      )
+      .setFooter({ text: `Prefix: ${PREFIX}` });
+
+    message.channel.send({ embeds: [embed] });
+  }
+
   // ── $vanitysetup ───────────────────────────────────────────────────────────
   if (command === "vanitysetup") {
     if (!message.member.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
