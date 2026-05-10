@@ -28,7 +28,8 @@ const client = new Client({
 });
 
 const PREFIX = "$";
-const TICKET_CREATOR_ID = "718493970652594217";
+// The ticket bot's application/client ID — channels it creates always have a permission overwrite for it
+const TICKET_BOT_ID = "718493970652594217";
 
 client.once("clientReady", async () => {
   console.log(`Logged in as ${client.user.tag}`);
@@ -126,6 +127,7 @@ client.on("messageCreate", async (message) => {
     let role = mentionMatch
       ? message.guild.roles.cache.get(mentionMatch[1])
       : message.guild.roles.cache.get(query);
+
     if (!role) {
       const lowerQuery = query.toLowerCase();
       role = message.guild.roles.cache
@@ -204,22 +206,24 @@ client.on("messageCreate", async (message) => {
     }
   }
 
+  // ── $rn ────────────────────────────────────────────────────────────────────
   if (command === "rn") {
-    const isTicketChannel = message.channel.name.startsWith("ticket-") || message.channel.topic?.includes(TICKET_CREATOR_ID);
-    if (!isTicketChannel) {
+    // Ticket channels created by the ticket bot always have a permission overwrite entry for it
+    const isTicket = message.channel.permissionOverwrites?.cache.has(TICKET_BOT_ID);
+    if (!isTicket) {
       return message.reply("not a ticket.");
     }
 
-    const newName = args.join(" ").trim();
+    const newName = args.join("-").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
     if (!newName) {
-      return message.reply("please provide a new ticket name.");
+      return message.reply("please provide a valid ticket name (letters, numbers, hyphens only).");
     }
 
     try {
       await message.channel.setName(newName);
       return message.reply(`renamed ticket to **${newName}**.`);
     } catch (err) {
-      console.error(err);
+      console.error("rn error:", err.message);
       return message.reply("something went wrong while renaming the ticket.");
     }
   }
@@ -233,23 +237,15 @@ client.on("messageCreate", async (message) => {
     const ch = message.channel;
     const userId = message.author.id;
 
-    await ch.send(new EmbedBuilder()
-      .setTitle("🎀 Vanity Role Setup")
-      .setDescription(
-        "Let's set up a vanity status role reward. I'll ask you a few questions.\n" +
-        "Type `cancel` at any time to abort."
-      )
-      .setColor(0x5865f2)
-      .toJSON()
-      ? { embeds: [new EmbedBuilder()
-          .setTitle("🎀 Vanity Role Setup")
-          .setDescription(
-            "Let's set up a vanity status role reward. I'll ask you a few questions.\n" +
-            "Type `cancel` at any time to abort."
-          )
-          .setColor(0x5865f2)] }
-      : "🎀 **Vanity Role Setup** — type `cancel` at any time to abort."
-    );
+    await ch.send({ embeds: [
+      new EmbedBuilder()
+        .setTitle("🎀 Vanity Role Setup")
+        .setDescription(
+          "Let's set up a vanity status role reward. I'll ask you a few questions.\n" +
+          "Type `cancel` at any time to abort."
+        )
+        .setColor(0x5865f2)
+    ]});
 
     // Step 1: texts
     const textMsg = await ask(
@@ -289,7 +285,6 @@ client.on("messageCreate", async (message) => {
     if (roleIds.length === 0)
       return ch.send("❌ No valid role mentions found. Please mention roles using @. Setup cancelled.");
 
-    // Validate roles exist and bot can manage them
     const botMember = await message.guild.members.fetchMe();
     const botHighest = botMember.roles.highest.position;
     const validRoles = [];
@@ -298,14 +293,13 @@ client.on("messageCreate", async (message) => {
     for (const id of roleIds) {
       const r = message.guild.roles.cache.get(id);
       if (!r) { invalidRoles.push(id); continue; }
-      if (r.position >= botHighest) { invalidRoles.push(r.name + " (too high)"); continue; }
+      if (r.position >= botHighest) { invalidRoles.push(`${r.name} (too high)`); continue; }
       validRoles.push(id);
     }
 
     if (validRoles.length === 0)
-      return ch.send(`❌ None of the roles could be managed by the bot. Make sure the bot's role is above the target roles.`);
+      return ch.send("❌ None of the roles could be managed by the bot. Make sure the bot's role is above the target roles.");
 
-    // Save config
     const vanity = loadVanity();
     if (!vanity[message.guild.id]) vanity[message.guild.id] = [];
     vanity[message.guild.id].push({ texts, matchType, roles: validRoles });
@@ -322,7 +316,7 @@ client.on("messageCreate", async (message) => {
         { name: "Match Type", value: matchType === "contains" ? "Status **contains** the text" : "Status must **exactly** match", inline: false },
         { name: "Role(s) to Give", value: roleNames, inline: false }
       )
-      .setFooter({ text: invalidRoles.length > 0 ? `Skipped (too high or not found): ${invalidRoles.join(", ")}` : "All roles configured successfully." })
+      .setFooter({ text: invalidRoles.length > 0 ? `Skipped: ${invalidRoles.join(", ")}` : "All roles configured successfully." })
       .setTimestamp();
 
     ch.send({ embeds: [confirmEmbed] });
