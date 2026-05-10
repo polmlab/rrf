@@ -28,6 +28,7 @@ const client = new Client({
 });
 
 const PREFIX = "$";
+const TICKET_CATEGORY_ID = "718493970652594217";
 
 client.once("clientReady", async () => {
   console.log(`Logged in as ${client.user.tag}`);
@@ -200,6 +201,25 @@ client.on("messageCreate", async (message) => {
     } catch (err) {
       console.error(err);
       message.reply("something went wrong while deleting invites.");
+    }
+  }
+
+  if (command === "rn") {
+    if (message.channel.parentId !== TICKET_CATEGORY_ID) {
+      return message.reply("not a ticket.");
+    }
+
+    const newName = args.join(" ").trim();
+    if (!newName) {
+      return message.reply("please provide a new ticket name.");
+    }
+
+    try {
+      await message.channel.setName(newName);
+      return message.reply(`renamed ticket to **${newName}**.`);
+    } catch (err) {
+      console.error(err);
+      return message.reply("something went wrong while renaming the ticket.");
     }
   }
 
