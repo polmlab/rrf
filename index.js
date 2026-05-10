@@ -246,15 +246,9 @@ client.on("messageCreate", async (message) => {
           inline: false,
         },
         {
-          name: "🔨 Mod",
-          value: [
-            "`$clearinvites` — Delete all server invites.",
-          ].join("\n"),
-          inline: false,
-        },
-        {
           name: "⚙️ Admin",
           value: [
+            "`$clearinvites` — Delete all server invites.",
             "`$vanitysetup` — Set up automatic role rewards for members with specific status text.",
             "`$vanitylist` — View all vanity role configs.",
             "`$vanityremove <number>` — Remove a vanity role config by its number.",
