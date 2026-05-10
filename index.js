@@ -205,7 +205,8 @@ client.on("messageCreate", async (message) => {
   }
 
   if (command === "rn") {
-    if (message.channel.ownerId !== TICKET_CREATOR_ID) {
+    const isTicketChannel = message.channel.name.startsWith("ticket-") || message.channel.topic?.includes(TICKET_CREATOR_ID);
+    if (!isTicketChannel) {
       return message.reply("not a ticket.");
     }
 
