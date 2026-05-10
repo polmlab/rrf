@@ -28,7 +28,7 @@ const client = new Client({
 });
 
 const PREFIX = "$";
-const TICKET_CATEGORY_ID = "718493970652594217";
+const TICKET_CREATOR_ID = "718493970652594217";
 
 client.once("clientReady", async () => {
   console.log(`Logged in as ${client.user.tag}`);
@@ -205,7 +205,7 @@ client.on("messageCreate", async (message) => {
   }
 
   if (command === "rn") {
-    if (message.channel.parentId !== TICKET_CATEGORY_ID) {
+    if (message.channel.ownerId !== TICKET_CREATOR_ID) {
       return message.reply("not a ticket.");
     }
 
