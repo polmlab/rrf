@@ -37,7 +37,7 @@ client.on("messageCreate", async (message) => {
     const embed = new EmbedBuilder()
       .setTitle("Vouch Us!")
       .setDescription(
-        `➡️ Please type: **vouch ${message.author} ${args.join(" ")}** in <#1493626835182027043> to support us and show others that we are legit!`
+        `➡️ Please type: **vouch ${message.author} ${args.join(" ")}** in <#1487260542526820423> to support us and show others that we are legit!`
       )
       .setColor(0x5865f2);
 
