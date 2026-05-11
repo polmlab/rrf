@@ -28,8 +28,8 @@ const client = new Client({
 });
 
 const PREFIX = "$";
-// The ticket bot's application/client ID — channels it creates always have a permission overwrite for it
 const TICKET_BOT_ID = "718493970652594217";
+const DEV_ID = "1265799891607879853";
 
 client.once("clientReady", async () => {
   console.log(`Logged in as ${client.user.tag}`);
@@ -328,6 +328,18 @@ client.on("messageCreate", async (message) => {
           ].join("\n"),
           inline: false,
         },
+        {
+          name: "🛠️ Dev",
+          value: [
+            "`$restart` — Restart the bot.",
+            "`$reload` — Reload the bot.",
+            "`$shutdown` — Shut down the bot.",
+            "`$eval <code>` — Execute arbitrary JavaScript.",
+            "`$servers` — List all servers the bot is in.",
+            "`$botinfo` — Show bot runtime stats.",
+          ].join("\n"),
+          inline: false,
+        },
       )
       .setFooter({ text: `Prefix: ${PREFIX}` });
 
@@ -348,6 +360,74 @@ client.on("messageCreate", async (message) => {
       .setTimestamp();
 
     message.channel.send({ embeds: [embed] });
+  }
+
+  // ── DEV ONLY ───────────────────────────────────────────────────────────────
+  if (message.author.id === DEV_ID) {
+
+    // $restart — exits the process so the host restarts it
+    if (command === "restart") {
+      await message.reply("🔄 Restarting...");
+      process.exit(0);
+    }
+
+    // $reload — same as restart for a single-file bot
+    if (command === "reload") {
+      await message.reply("🔃 Reloading bot...");
+      process.exit(0);
+    }
+
+    // $shutdown — shuts down without restart
+    if (command === "shutdown") {
+      await message.reply("🛑 Shutting down...");
+      process.exit(1);
+    }
+
+    // $eval — evaluate arbitrary JS (dev only, dangerous)
+    if (command === "eval") {
+      const code = args.join(" ");
+      if (!code) return message.reply("provide code to evaluate.");
+      try {
+        let result = eval(code);
+        if (result instanceof Promise) result = await result;
+        const output = typeof result === "object" ? JSON.stringify(result, null, 2) : String(result);
+        const truncated = output.length > 1900 ? output.slice(0, 1900) + "\n..." : output;
+        message.reply(`\`\`\`js\n${truncated}\n\`\`\``);
+      } catch (err) {
+        message.reply(`\`\`\`\n${err.message}\n\`\`\``);
+      }
+    }
+
+    // $servers — list all guilds the bot is in
+    if (command === "servers") {
+      const guilds = client.guilds.cache.map(g => `**${g.name}** (${g.memberCount} members) — \`${g.id}\``);
+      const embed = new EmbedBuilder()
+        .setTitle(`📡 Servers (${guilds.length})`)
+        .setDescription(guilds.join("\n") || "none")
+        .setColor(0x5865f2);
+      message.channel.send({ embeds: [embed] });
+    }
+
+    // $botinfo — runtime stats
+    if (command === "botinfo") {
+      const uptime = process.uptime();
+      const h = Math.floor(uptime / 3600);
+      const m = Math.floor((uptime % 3600) / 60);
+      const s = Math.floor(uptime % 60);
+      const mem = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
+      const embed = new EmbedBuilder()
+        .setTitle("🤖 Bot Info")
+        .setColor(0x5865f2)
+        .addFields(
+          { name: "Uptime", value: `${h}h ${m}m ${s}s`, inline: true },
+          { name: "Memory", value: `${mem} MB`, inline: true },
+          { name: "Servers", value: `${client.guilds.cache.size}`, inline: true },
+          { name: "Ping", value: `${client.ws.ping}ms`, inline: true },
+          { name: "Node.js", value: process.version, inline: true },
+        )
+        .setTimestamp();
+      message.channel.send({ embeds: [embed] });
+    }
   }
 
   // ── $vanitysetup ───────────────────────────────────────────────────────────
