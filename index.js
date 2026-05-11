@@ -306,37 +306,35 @@ client.on("messageCreate", async (message) => {
         {
           name: "👤 Regular",
           value: [
-            "`$ping` — Check the bot's latency.",
-            "`$vouch` — Get the vouch instructions.",
-            "`$inrole <role>` — List all members in a role (paginated).",
-            "`$ticketcount` — Show how many tickets are currently open.",
-            "`$rn <name>` — Rename the current ticket channel.",
-            "`$close` — Close and delete the current ticket.",
-            "`$remind <@user|id>` — DM a user to check their ticket.",
-            "`$wait` — Send the standard wait message in a ticket.",
-            "`$proof` — Ask the user to send screenshot proofs of their invites.",
+            "`$ping`",
+            "`$vouch`",
+            "`$inrole <role>`",
+            "`$ticketcount`",
+            "`$rn <name>`",
+            "`$close`",
+            "`$remind <@user|id>`",
+            "`$wait`",
+            "`$proof`",
           ].join("\n"),
           inline: false,
         },
         {
           name: "⚙️ Admin",
           value: [
-            "`$clearinvites` — Delete all server invites.",
-            "`$vanitysetup` — Set up automatic role rewards for members with specific status text.",
-            "`$vanitylist` — View all vanity role configs.",
-            "`$vanityremove <number>` — Remove a vanity role config by its number.",
+            "`$clearinvites`",
+            "`$vanitysetup`",
+            "`$vanitylist`",
+            "`$vanityremove <number>`",
           ].join("\n"),
           inline: false,
         },
         {
           name: "🛠️ Dev",
           value: [
-            "`$restart` — Restart the bot.",
-            "`$reload` — Reload the bot.",
-            "`$shutdown` — Shut down the bot.",
-            "`$eval <code>` — Execute arbitrary JavaScript.",
-            "`$servers` — List all servers the bot is in.",
-            "`$botinfo` — Show bot runtime stats.",
+            "`$restart`",
+            "`$reload`",
+            "`$shutdown`",
+            "`$eval <code>`",
           ].join("\n"),
           inline: false,
         },
@@ -398,36 +396,6 @@ client.on("messageCreate", async (message) => {
       }
     }
 
-    // $servers — list all guilds the bot is in
-    if (command === "servers") {
-      const guilds = client.guilds.cache.map(g => `**${g.name}** (${g.memberCount} members) — \`${g.id}\``);
-      const embed = new EmbedBuilder()
-        .setTitle(`📡 Servers (${guilds.length})`)
-        .setDescription(guilds.join("\n") || "none")
-        .setColor(0x5865f2);
-      message.channel.send({ embeds: [embed] });
-    }
-
-    // $botinfo — runtime stats
-    if (command === "botinfo") {
-      const uptime = process.uptime();
-      const h = Math.floor(uptime / 3600);
-      const m = Math.floor((uptime % 3600) / 60);
-      const s = Math.floor(uptime % 60);
-      const mem = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2);
-      const embed = new EmbedBuilder()
-        .setTitle("🤖 Bot Info")
-        .setColor(0x5865f2)
-        .addFields(
-          { name: "Uptime", value: `${h}h ${m}m ${s}s`, inline: true },
-          { name: "Memory", value: `${mem} MB`, inline: true },
-          { name: "Servers", value: `${client.guilds.cache.size}`, inline: true },
-          { name: "Ping", value: `${client.ws.ping}ms`, inline: true },
-          { name: "Node.js", value: process.version, inline: true },
-        )
-        .setTimestamp();
-      message.channel.send({ embeds: [embed] });
-    }
   }
 
   // ── $vanitysetup ───────────────────────────────────────────────────────────
