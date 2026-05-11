@@ -263,6 +263,22 @@ client.on("messageCreate", async (message) => {
     }
   }
 
+  // ── $proof ─────────────────────────────────────────────────────────────────
+  if (command === "proof") {
+    const isTicket = message.channel.permissionOverwrites?.cache.has(TICKET_BOT_ID);
+    if (!isTicket) return message.reply("not a ticket.");
+
+    const embed = new EmbedBuilder()
+      .setTitle("Proofs")
+      .setDescription(
+        "➡️ Please send **screenshot proofs** of your invites.\n" +
+        "This is a check we do to make sure you don't invite bots or fake accounts."
+      )
+      .setColor(0x5865f2);
+
+    message.channel.send({ embeds: [embed] });
+  }
+
   // ── $wait ──────────────────────────────────────────────────────────────────
   if (command === "wait") {
     const isTicket = message.channel.permissionOverwrites?.cache.has(TICKET_BOT_ID);
