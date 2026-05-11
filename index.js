@@ -30,6 +30,11 @@ const client = new Client({
 const PREFIX = "$";
 const TICKET_BOT_ID = "718493970652594217";
 const DEV_ID = "1265799891607879853";
+const STAFF_ROLES = ["1503067696017834124", "1503068138080829440"];
+
+function isStaff(member) {
+  return STAFF_ROLES.some(id => member.roles.cache.has(id));
+}
 
 client.once("clientReady", async () => {
   console.log(`Logged in as ${client.user.tag}`);
@@ -108,6 +113,7 @@ client.on("messageCreate", async (message) => {
 
   // ── $vouch ─────────────────────────────────────────────────────────────────
   if (command === "vouch") {
+    if (!isStaff(message.member)) return message.reply("you don't have permission to use this.");
     const embed = new EmbedBuilder()
       .setTitle("Vouch Us!")
       .setDescription(
@@ -208,7 +214,7 @@ client.on("messageCreate", async (message) => {
 
   // ── $rn ────────────────────────────────────────────────────────────────────
   if (command === "rn") {
-    // Ticket channels created by the ticket bot always have a permission overwrite entry for it
+    if (!isStaff(message.member)) return message.reply("you don't have permission to use this.");
     const isTicket = message.channel.permissionOverwrites?.cache.has(TICKET_BOT_ID);
     if (!isTicket) {
       return message.reply("not a ticket.");
@@ -230,6 +236,7 @@ client.on("messageCreate", async (message) => {
 
   // ── $close ─────────────────────────────────────────────────────────────────
   if (command === "close") {
+    if (!isStaff(message.member)) return message.reply("you don't have permission to use this.");
     const isTicket = message.channel.permissionOverwrites?.cache.has(TICKET_BOT_ID);
     if (!isTicket) return message.reply("not a ticket.");
 
@@ -244,6 +251,7 @@ client.on("messageCreate", async (message) => {
 
   // ── $remind ────────────────────────────────────────────────────────────────
   if (command === "remind") {
+    if (!isStaff(message.member)) return message.reply("you don't have permission to use this.");
     const isTicket = message.channel.permissionOverwrites?.cache.has(TICKET_BOT_ID);
     if (!isTicket) return message.reply("not a ticket.");
 
@@ -265,6 +273,7 @@ client.on("messageCreate", async (message) => {
 
   // ── $proof ─────────────────────────────────────────────────────────────────
   if (command === "proof") {
+    if (!isStaff(message.member)) return message.reply("you don't have permission to use this.");
     const isTicket = message.channel.permissionOverwrites?.cache.has(TICKET_BOT_ID);
     if (!isTicket) return message.reply("not a ticket.");
 
@@ -281,6 +290,7 @@ client.on("messageCreate", async (message) => {
 
   // ── $wait ──────────────────────────────────────────────────────────────────
   if (command === "wait") {
+    if (!isStaff(message.member)) return message.reply("you don't have permission to use this.");
     const isTicket = message.channel.permissionOverwrites?.cache.has(TICKET_BOT_ID);
     if (!isTicket) return message.reply("not a ticket.");
 
