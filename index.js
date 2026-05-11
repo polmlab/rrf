@@ -314,6 +314,7 @@ client.on("messageCreate", async (message) => {
             "`$close` — Close and delete the current ticket.",
             "`$remind <@user|id>` — DM a user to check their ticket.",
             "`$wait` — Send the standard wait message in a ticket.",
+            "`$proof` — Ask the user to send screenshot proofs of their invites.",
           ].join("\n"),
           inline: false,
         },
