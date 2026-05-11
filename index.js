@@ -228,6 +228,59 @@ client.on("messageCreate", async (message) => {
     }
   }
 
+  // ── $close ─────────────────────────────────────────────────────────────────
+  if (command === "close") {
+    const isTicket = message.channel.permissionOverwrites?.cache.has(TICKET_BOT_ID);
+    if (!isTicket) return message.reply("not a ticket.");
+
+    await message.channel.send("🔒 Closing ticket...");
+    try {
+      await message.channel.delete();
+    } catch (err) {
+      console.error("close error:", err.message);
+      message.reply("something went wrong while closing the ticket.");
+    }
+  }
+
+  // ── $remind ────────────────────────────────────────────────────────────────
+  if (command === "remind") {
+    const isTicket = message.channel.permissionOverwrites?.cache.has(TICKET_BOT_ID);
+    if (!isTicket) return message.reply("not a ticket.");
+
+    const target = message.mentions.users.first()
+      ?? (args[0] ? await client.users.fetch(args[0]).catch(() => null) : null);
+
+    if (!target) return message.reply("please mention a user or provide their ID.");
+
+    try {
+      await target.send(
+        `👋 Hey **${target.username}**, you have an open ticket in **${message.guild.name}** that needs your attention!\n` +
+        `➡️ Head back to your ticket: ${message.channel.url}`
+      );
+      message.reply(`✅ Sent a reminder to **${target.username}** via DM.`);
+    } catch {
+      message.reply(`❌ Couldn't DM **${target.username}** — they may have DMs disabled.`);
+    }
+  }
+
+  // ── $wait ──────────────────────────────────────────────────────────────────
+  if (command === "wait") {
+    const isTicket = message.channel.permissionOverwrites?.cache.has(TICKET_BOT_ID);
+    if (!isTicket) return message.reply("not a ticket.");
+
+    const embed = new EmbedBuilder()
+      .setDescription(
+        "➡️ We are trying our best to pay the rewards fast. There are other people claiming before you.\n\n" +
+        "🤝 What we're asking you:\n" +
+        "**1.**: Wait patiently for your reward, you will be paid (check <#1487260542526820423>)\n" +
+        "**2.**: Please don't spam ping the staff team, pinging them will not make the payment faster.\n" +
+        "**3.**: Stay polite in tickets."
+      )
+      .setColor(0x5865f2);
+
+    message.channel.send({ embeds: [embed] });
+  }
+
   // ── $help ──────────────────────────────────────────────────────────────────
   if (command === "help") {
     const embed = new EmbedBuilder()
@@ -240,8 +293,11 @@ client.on("messageCreate", async (message) => {
             "`$ping` — Check the bot's latency.",
             "`$vouch` — Get the vouch instructions.",
             "`$inrole <role>` — List all members in a role (paginated).",
-            "`$rn <name>` — Rename the current ticket channel.",
             "`$ticketcount` — Show how many tickets are currently open.",
+            "`$rn <name>` — Rename the current ticket channel.",
+            "`$close` — Close and delete the current ticket.",
+            "`$remind <@user|id>` — DM a user to check their ticket.",
+            "`$wait` — Send the standard wait message in a ticket.",
           ].join("\n"),
           inline: false,
         },
