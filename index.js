@@ -31,6 +31,7 @@ const PREFIX = "$";
 const TICKET_BOT_ID = "718493970652594217";
 const DEV_ID = "1265799891607879853";
 const STAFF_ROLES = ["1503067696017834124", "1503068138080829440"];
+const LOG_CHANNEL_ID = "1478979915851235361";
 
 function isStaff(member) {
   return STAFF_ROLES.some(id => member.roles.cache.has(id));
@@ -226,7 +227,22 @@ client.on("messageCreate", async (message) => {
     }
 
     try {
+      const oldName = message.channel.name;
       await message.channel.setName(newName);
+      const logChannel = message.guild.channels.cache.get(LOG_CHANNEL_ID);
+      if (logChannel) {
+        logChannel.send({ embeds: [
+          new EmbedBuilder()
+            .setTitle("✏️ Ticket Renamed")
+            .setColor(0x5865f2)
+            .addFields(
+              { name: "Before", value: `\`${oldName}\``, inline: true },
+              { name: "After", value: `\`${newName}\``, inline: true },
+              { name: "By", value: `${message.author}`, inline: true },
+            )
+            .setTimestamp()
+        ]});
+      }
       return message.reply(`renamed ticket to **${newName}**.`);
     } catch (err) {
       console.error("rn error:", err.message);
@@ -240,8 +256,23 @@ client.on("messageCreate", async (message) => {
     const isTicket = message.channel.permissionOverwrites?.cache.has(TICKET_BOT_ID);
     if (!isTicket) return message.reply("not a ticket.");
 
+    const ticketName = message.channel.name;
+    const closer = message.author;
     await message.channel.send("🔒 Closing ticket...");
     try {
+      const logChannel = message.guild.channels.cache.get(LOG_CHANNEL_ID);
+      if (logChannel) {
+        await logChannel.send({ embeds: [
+          new EmbedBuilder()
+            .setTitle("🔒 Ticket Closed")
+            .setColor(0xed4245)
+            .addFields(
+              { name: "Ticket", value: `\`${ticketName}\``, inline: true },
+              { name: "Closed by", value: `${closer}`, inline: true },
+            )
+            .setTimestamp()
+        ]});
+      }
       await message.channel.delete();
     } catch (err) {
       console.error("close error:", err.message);
